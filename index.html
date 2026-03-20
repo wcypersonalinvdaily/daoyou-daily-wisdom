@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>道友 · Daily Wisdom</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Sora:wght@200;300;400;500;600;700&display=swap');
+
+:root {
+  --bg: #faf9f6;
+  --bg2: #f0ede8;
+  --surface: #ffffff;
+  --glass: rgba(255,255,255,0.85);
+  --border: #e8e4dd;
+  --ink: #1a1712;
+  --ink2: #5c564d;
+  --ink3: #a09888;
+  --warm: #8b6914;
+  --warm-bg: #fdf6e3;
+  --warm-light: #f5e6c8;
+  --blue: #1e40af;
+  --blue-bg: #eff6ff;
+  --green: #166534;
+  --green-bg: #f0fdf4;
+  --red: #991b1b;
+  --red-bg: #fef2f2;
+  --purple: #5b21b6;
+  --purple-bg: #f5f3ff;
+  --r: 12px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.04);
+  --shadow-lg: 0 4px 16px rgba(0,0,0,0.06);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); font-family:'Sora',sans-serif; color:var(--ink); min-height:100vh; }
+
+.page { max-width:800px; margin:0 auto; padding:20px 16px 80px; }
+
+.header { text-align:center; margin-bottom:32px; padding:28px 0; }
+.header .kanji { font-family:'Cormorant Garamond',serif; font-size:2.8rem; font-weight:300; color:var(--warm); letter-spacing:0.4em; opacity:0.6; }
+.header h1 { font-family:'Cormorant Garamond',serif; font-size:1rem; font-weight:400; color:var(--ink2); letter-spacing:0.2em; margin-top:4px; }
+.header .date { font-size:0.72rem; color:var(--ink3); margin-top:8px; letter-spacing:0.15em; }
+.header .line { width:80px; height:1px; background:linear-gradient(90deg, transparent, var(--warm), transparent); margin:12px auto 0; }
+
+/* Quote of the day */
+.quote-card { background:linear-gradient(135deg, #fdf6e3 0%, #fef9ef 50%, #fff 100%); border:1px solid var(--warm-light); border-radius:16px; padding:32px 28px; margin-bottom:20px; text-align:center; position:relative; overflow:hidden; box-shadow:var(--shadow-lg); }
+.quote-card::before { content:'❝'; position:absolute; top:-10px; left:20px; font-size:5rem; color:rgba(139,105,20,0.06); font-family:serif; }
+.quote-text { font-family:'Cormorant Garamond',serif; font-size:1.2rem; font-weight:400; line-height:1.8; color:var(--ink); font-style:italic; margin-bottom:12px; position:relative; z-index:1; }
+.quote-author { font-size:0.75rem; color:var(--warm); font-weight:600; letter-spacing:0.1em; }
+.quote-mood { display:flex; gap:6px; justify-content:center; margin-top:14px; }
+.mood-tag { font-size:0.65rem; padding:3px 10px; border-radius:999px; background:var(--warm-bg); color:var(--warm); border:1px solid var(--warm-light); }
+.quote-refresh { position:absolute; top:12px; right:14px; background:none; border:none; font-size:1rem; cursor:pointer; color:var(--ink3); opacity:0.5; transition:opacity 0.2s; }
+.quote-refresh:hover { opacity:1; }
+
+/* Tabs */
+.tabs { display:flex; gap:3px; margin-bottom:20px; background:var(--surface); border-radius:var(--r); padding:4px; border:1px solid var(--border); }
+.tab-btn { flex:1; padding:10px 6px; border:none; background:transparent; font-family:inherit; font-size:0.74rem; font-weight:400; cursor:pointer; color:var(--ink3); transition:all 0.3s; border-radius:8px; }
+.tab-btn.active { color:var(--warm); background:var(--warm-bg); font-weight:600; }
+.tab-panel { display:none; }
+.tab-panel.active { display:block; }
+
+/* Cards */
+.card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:20px; margin-bottom:14px; box-shadow:var(--shadow); }
+.card-title { display:flex; align-items:center; gap:10px; margin-bottom:14px; font-size:0.88rem; font-weight:600; }
+
+/* News article */
+.news-item { padding:16px; border:1px solid var(--border); border-radius:10px; margin-bottom:10px; background:var(--surface); transition:all 0.2s; cursor:default; }
+.news-item:hover { border-color:var(--warm); box-shadow:var(--shadow); }
+.news-topic { font-size:0.65rem; padding:3px 10px; border-radius:999px; font-weight:600; display:inline-block; margin-bottom:8px; }
+.topic-ai { background:var(--blue-bg); color:var(--blue); }
+.topic-biz { background:var(--green-bg); color:var(--green); }
+.topic-invest { background:var(--warm-bg); color:var(--warm); }
+.news-title { font-size:0.9rem; font-weight:600; margin-bottom:6px; line-height:1.5; }
+.news-summary { font-size:0.78rem; color:var(--ink2); line-height:1.7; margin-bottom:8px; }
+.news-meta { display:flex; gap:12px; align-items:center; font-size:0.68rem; color:var(--ink3); }
+.news-insight { margin-top:10px; padding:10px 14px; background:var(--warm-bg); border-radius:8px; font-size:0.75rem; color:var(--warm); line-height:1.6; border-left:3px solid var(--warm); }
+
+/* Briefing status */
+.briefing-status { display:flex; align-items:center; gap:10px; padding:12px 16px; border-radius:var(--r); margin-bottom:14px; font-size:0.8rem; }
+.briefing-loading { background:var(--blue-bg); color:var(--blue); border:1px solid rgba(30,64,175,0.15); }
+.briefing-done { background:var(--green-bg); color:var(--green); border:1px solid rgba(22,101,52,0.15); }
+.briefing-error { background:var(--red-bg); color:var(--red); border:1px solid rgba(153,27,27,0.15); }
+
+/* Journal */
+.journal-entry { padding:16px; border:1px solid var(--border); border-radius:10px; margin-bottom:10px; background:var(--surface); }
+.journal-date { font-size:0.72rem; font-weight:600; color:var(--warm); margin-bottom:6px; }
+.journal-text { font-size:0.8rem; color:var(--ink2); line-height:1.7; }
+.journal-tags { display:flex; gap:4px; margin-top:8px; flex-wrap:wrap; }
+
+/* Bookmark */
+.bookmark { display:flex; align-items:center; gap:12px; padding:12px 14px; border:1px solid var(--border); border-radius:8px; margin-bottom:6px; background:var(--surface); }
+.bookmark:hover { border-color:var(--warm); }
+.bookmark-title { font-size:0.8rem; font-weight:500; flex:1; }
+.bookmark-link { font-size:0.72rem; color:var(--blue); text-decoration:none; }
+
+/* Form */
+.form-group { display:flex; flex-direction:column; gap:4px; margin-bottom:12px; }
+.form-group label { font-size:0.68rem; font-weight:500; color:var(--ink3); text-transform:uppercase; letter-spacing:0.06em; }
+.form-group input, .form-group select, .form-group textarea { padding:9px 12px; border:1px solid var(--border); border-radius:8px; font-size:0.82rem; font-family:inherit; background:var(--surface); color:var(--ink); }
+.form-group input:focus, .form-group textarea:focus { outline:none; border-color:var(--warm); box-shadow:0 0 0 2px rgba(139,105,20,0.1); }
+
+.btn { padding:8px 16px; border:1px solid var(--border); border-radius:8px; font-size:0.78rem; font-weight:500; cursor:pointer; background:var(--surface); color:var(--ink); font-family:inherit; transition:all 0.2s; }
+.btn:hover { border-color:var(--warm); color:var(--warm); }
+.btn-primary { background:var(--warm); color:#fff; border-color:var(--warm); }
+.btn-primary:hover { background:#7a5c11; }
+.btn-sm { padding:5px 10px; font-size:0.7rem; }
+
+/* Toast */
+.toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); padding:12px 24px; border-radius:10px; font-size:0.82rem; font-weight:500; z-index:200; opacity:0; transition:opacity 0.3s; pointer-events:none; }
+.toast.show { opacity:1; }
+.toast.ok { background:var(--green); color:#fff; }
+.toast.err { background:var(--red); color:#fff; }
+
+.spinner { display:inline-block; width:14px; height:14px; border:2px solid rgba(0,0,0,0.1); border-top-color:currentColor; border-radius:50%; animation:spin 0.6s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+@media(max-width:600px) {
+  .quote-text { font-size:1rem; }
+  .header .kanji { font-size:2rem; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="kanji">学 悟</div>
+    <h1>Daily Wisdom & World Briefing</h1>
+    <div class="line"></div>
+    <div class="date" id="dateDisplay"></div>
+  </div>
+
+  <!-- Quote of the Day -->
+  <div class="quote-card" id="quoteCard">
+    <button class="quote-refresh" onclick="generateQuote()" title="New quote">🔄</button>
+    <div class="quote-text" id="quoteText">Loading wisdom...</div>
+    <div class="quote-author" id="quoteAuthor"></div>
+    <div class="quote-mood" id="quoteMood"></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('briefing')">📰 Daily Briefing</button>
+    <button class="tab-btn" onclick="switchTab('journal')">📝 Notebook</button>
+    <button class="tab-btn" onclick="switchTab('bookmarks')">🔖 Saved</button>
+    <button class="tab-btn" onclick="switchTab('quotes')">💎 Quotes</button>
+  </div>
+
+  <!-- ═══ DAILY BRIEFING ═══ -->
+  <div class="tab-panel active" id="tab-briefing">
+    <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center;">
+      <button class="btn btn-primary" onclick="generateBriefing()" id="briefingBtn">⚡ Generate Today's Briefing</button>
+      <span style="font-size:0.72rem;color:var(--ink3);" id="briefingTime"></span>
+    </div>
+    <div id="briefingStatus"></div>
+    <div id="briefingContent"></div>
+  </div>
+
+  <!-- ═══ NOTEBOOK ═══ -->
+  <div class="tab-panel" id="tab-journal">
+    <div class="card">
+      <div class="card-title">📝 Learning Notes & Reflections</div>
+      <div class="form-group">
+        <label>What did I learn today?</label>
+        <textarea id="noteText" rows="4" placeholder="A new concept, an insight from an article, a realization..."></textarea>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <div class="form-group" style="flex:1;">
+          <label>Source (optional)</label>
+          <input type="text" id="noteSource" placeholder="Article, book, conversation...">
+        </div>
+        <div class="form-group" style="flex:1;">
+          <label>Tag</label>
+          <select id="noteTag">
+            <option value="AI">🤖 AI / Tech</option>
+            <option value="Business">💼 Business</option>
+            <option value="Investing">📈 Investing</option>
+            <option value="Psychology">🧠 Psychology</option>
+            <option value="Life Lesson">💡 Life Lesson</option>
+            <option value="Quote">💎 Quote</option>
+            <option value="Other">📌 Other</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="saveNote()" style="width:100%;padding:10px;">Save Note</button>
+    </div>
+    <div id="journalHistory"></div>
+  </div>
+
+  <!-- ═══ BOOKMARKS ═══ -->
+  <div class="tab-panel" id="tab-bookmarks">
+    <div class="card">
+      <div class="card-title">🔖 Saved Articles & Resources</div>
+      <div style="display:flex;gap:8px;">
+        <div class="form-group" style="flex:2;">
+          <label>Title</label>
+          <input type="text" id="bmTitle" placeholder="Article or resource title">
+        </div>
+        <div class="form-group" style="flex:3;">
+          <label>URL</label>
+          <input type="text" id="bmUrl" placeholder="https://...">
+        </div>
+        <div class="form-group">
+          <label>&nbsp;</label>
+          <button class="btn btn-primary btn-sm" onclick="saveBookmark()">+ Save</button>
+        </div>
+      </div>
+    </div>
+    <div id="bookmarkList"></div>
+  </div>
+
+  <!-- ═══ QUOTES COLLECTION ═══ -->
+  <div class="tab-panel" id="tab-quotes">
+    <div class="card">
+      <div class="card-title">💎 Wisdom Collection</div>
+      <div style="display:flex;gap:8px;">
+        <div class="form-group" style="flex:2;">
+          <label>Quote</label>
+          <input type="text" id="customQuote" placeholder="Enter a quote that resonates...">
+        </div>
+        <div class="form-group" style="flex:1;">
+          <label>Author</label>
+          <input type="text" id="customAuthor" placeholder="Who said it">
+        </div>
+        <div class="form-group">
+          <label>&nbsp;</label>
+          <button class="btn btn-primary btn-sm" onclick="saveCustomQuote()">+ Add</button>
+        </div>
+      </div>
+    </div>
+    <div id="quoteCollection"></div>
+  </div>
+
+</div>
+
+<!-- API Key Modal -->
+<div id="apiModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;align-items:center;justify-content:center;">
+  <div style="background:var(--surface);border-radius:16px;padding:28px;max-width:480px;width:90%;box-shadow:var(--shadow-lg);">
+    <h3 style="font-size:1rem;margin-bottom:12px;">🔑 API Key Required</h3>
+    <p style="font-size:0.8rem;color:var(--ink2);margin-bottom:14px;">To auto-generate daily briefings and quotes, enter your Anthropic API key. It's stored locally on your device only.</p>
+    <div class="form-group">
+      <label>Anthropic API Key</label>
+      <input type="password" id="apiKeyInput" placeholder="sk-ant-...">
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button class="btn btn-primary" onclick="saveApiKey()" style="flex:1;">Save & Generate</button>
+      <button class="btn" onclick="document.getElementById('apiModal').style.display='none'" style="flex:1;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════
+// BUILT-IN QUOTES LIBRARY
+// ═══════════════════════════════════════
+const QUOTE_LIBRARY = [
+  // Discipline & Action
+  { text: "We suffer more in imagination than in reality.", author: "Seneca", mood: ["fear", "anxiety"] },
+  { text: "The impediment to action advances action. What stands in the way becomes the way.", author: "Marcus Aurelius", mood: ["obstacle", "motivation"] },
+  { text: "He who has a why to live can bear almost any how.", author: "Friedrich Nietzsche", mood: ["purpose", "resilience"] },
+  { text: "You do not rise to the level of your goals. You fall to the level of your systems.", author: "James Clear", mood: ["discipline", "systems"] },
+  { text: "The best time to plant a tree was 20 years ago. The second best time is now.", author: "Chinese Proverb", mood: ["action", "start"] },
+  { text: "Knowing is not enough; we must apply. Willing is not enough; we must do.", author: "Bruce Lee", mood: ["action", "laziness"] },
+  { text: "The only way to do great work is to love what you do.", author: "Steve Jobs", mood: ["purpose", "career"] },
+  { text: "Hard choices, easy life. Easy choices, hard life.", author: "Jerzy Gregorek", mood: ["discipline", "courage"] },
+  // Authenticity & Self
+  { text: "To be yourself in a world that is constantly trying to make you something else is the greatest accomplishment.", author: "Ralph Waldo Emerson", mood: ["authenticity", "courage"] },
+  { text: "The privilege of a lifetime is to become who you truly are.", author: "Carl Jung", mood: ["growth", "authenticity"] },
+  { text: "No one can make you feel inferior without your consent.", author: "Eleanor Roosevelt", mood: ["confidence", "self-worth"] },
+  { text: "Be who you are and say what you feel, because those who mind don't matter, and those who matter don't mind.", author: "Bernard Baruch", mood: ["authenticity", "fear"] },
+  { text: "Your task is not to seek for love, but merely to seek and find all the barriers within yourself that you have built against it.", author: "Rumi", mood: ["love", "vulnerability"] },
+  // Resilience & Pain
+  { text: "The wound is the place where the light enters you.", author: "Rumi", mood: ["pain", "healing"] },
+  { text: "What does not kill me makes me stronger.", author: "Friedrich Nietzsche", mood: ["resilience", "pain"] },
+  { text: "Fall seven times, stand up eight.", author: "Japanese Proverb", mood: ["resilience", "persistence"] },
+  { text: "Pain is inevitable. Suffering is optional.", author: "Haruki Murakami", mood: ["pain", "mindset"] },
+  { text: "The oak fought the wind and was broken, the willow bent when it must and survived.", author: "Robert Jordan", mood: ["adaptability", "resilience"] },
+  // Wealth & Success
+  { text: "The stock market is a device for transferring money from the impatient to the patient.", author: "Warren Buffett", mood: ["investing", "patience"] },
+  { text: "Price is what you pay. Value is what you get.", author: "Warren Buffett", mood: ["investing", "wisdom"] },
+  { text: "It is not the strongest of the species that survives, nor the most intelligent, but the one most responsive to change.", author: "Charles Darwin", mood: ["adaptability", "growth"] },
+  { text: "Compound interest is the eighth wonder of the world.", author: "Albert Einstein", mood: ["investing", "patience"] },
+  { text: "The best investment you can make is in yourself.", author: "Warren Buffett", mood: ["growth", "self-worth"] },
+  // Eastern Wisdom
+  { text: "致虚极，守静笃。", author: "Laozi · Dao De Jing", mood: ["stillness", "peace"] },
+  { text: "大道至简。", author: "Laozi", mood: ["simplicity", "clarity"] },
+  { text: "知人者智，自知者明。", author: "Laozi · Dao De Jing", mood: ["self-awareness", "wisdom"] },
+  { text: "When I let go of what I am, I become what I might be.", author: "Laozi", mood: ["growth", "letting-go"] },
+  { text: "The journey of a thousand miles begins with a single step.", author: "Laozi", mood: ["action", "start"] },
+  { text: "Before enlightenment, chop wood, carry water. After enlightenment, chop wood, carry water.", author: "Zen Proverb", mood: ["presence", "simplicity"] },
+  // Charlie Munger / Investing wisdom
+  { text: "The big money is not in the buying and selling, but in the waiting.", author: "Charlie Munger", mood: ["patience", "investing"] },
+  { text: "Spend each day trying to be a little wiser than you were when you woke up.", author: "Charlie Munger", mood: ["growth", "discipline"] },
+  { text: "Show me the incentive and I will show you the outcome.", author: "Charlie Munger", mood: ["systems", "wisdom"] },
+  { text: "The world is not driven by greed. It's driven by envy.", author: "Charlie Munger", mood: ["wisdom", "self-awareness"] },
+];
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let DATA = {
+  apiKey: '',
+  briefings: [],  // { date, articles: [{topic, title, summary, insight, source}] }
+  notes: [],      // { date, text, source, tag }
+  bookmarks: [],  // { title, url, date }
+  customQuotes: [], // { text, author }
+  todayQuote: null
+};
+
+(function init() {
+  document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('en-SG', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+
+  try { const saved = JSON.parse(localStorage.getItem('daoyou_wisdom')); if (saved) DATA = {...DATA, ...saved}; } catch(e) {}
+
+  showDailyQuote();
+  renderAll();
+
+  // Check if today's briefing exists
+  const today = new Date().toISOString().slice(0,10);
+  const todayBriefing = DATA.briefings.find(b => b.date === today);
+  if (todayBriefing) {
+    renderBriefingArticles(todayBriefing.articles);
+    document.getElementById('briefingTime').textContent = 'Generated today';
+  }
+})();
+
+function save() { localStorage.setItem('daoyou_wisdom', JSON.stringify(DATA)); }
+function formatDate(d) { if (!d) return '—'; const p = String(d).split('-'); return p.length===3 ? p[2]+'/'+p[1]+'/'+p[0] : d; }
+
+function renderAll() {
+  renderJournalHistory();
+  renderBookmarks();
+  renderQuoteCollection();
+}
+
+// ═══════════════════════════════════════
+// DAILY QUOTE
+// ═══════════════════════════════════════
+function showDailyQuote() {
+  const today = new Date().toISOString().slice(0,10);
+  const allQuotes = [...QUOTE_LIBRARY, ...DATA.customQuotes.map(q => ({...q, mood:['custom']}))];
+
+  // Use date as seed for consistent daily quote
+  if (DATA.todayQuote && DATA.todayQuote.date === today) {
+    displayQuote(DATA.todayQuote);
+    return;
+  }
+
+  const seed = today.split('-').reduce((s,n) => s + parseInt(n), 0);
+  const idx = seed % allQuotes.length;
+  const q = allQuotes[idx];
+  DATA.todayQuote = { date: today, text: q.text, author: q.author, mood: q.mood || [] };
+  save();
+  displayQuote(DATA.todayQuote);
+}
+
+function displayQuote(q) {
+  document.getElementById('quoteText').textContent = q.text;
+  document.getElementById('quoteAuthor').textContent = '— ' + q.author;
+  document.getElementById('quoteMood').innerHTML = (q.mood||[]).map(m =>
+    `<span class="mood-tag">${m}</span>`
+  ).join('');
+}
+
+function generateQuote() {
+  const allQuotes = [...QUOTE_LIBRARY, ...DATA.customQuotes.map(q => ({...q, mood:['custom']}))];
+  const idx = Math.floor(Math.random() * allQuotes.length);
+  const q = allQuotes[idx];
+  displayQuote({ text: q.text, author: q.author, mood: q.mood || [] });
+}
+
+// ═══════════════════════════════════════
+// AI BRIEFING
+// ═══════════════════════════════════════
+async function generateBriefing() {
+  if (!DATA.apiKey) {
+    document.getElementById('apiModal').style.display = 'flex';
+    return;
+  }
+
+  const btn = document.getElementById('briefingBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Generating...';
+  document.getElementById('briefingStatus').innerHTML = '<div class="briefing-status briefing-loading"><span class="spinner"></span> AI is researching today\'s top stories...</div>';
+
+  const today = new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': DATA.apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2000,
+        messages: [{ role: 'user', content: `Today is ${today}. You are a personal intelligence briefing assistant for a construction GM in Singapore who is interested in AI/Technology and Business/Startups.
+
+Generate a daily briefing with exactly 5 news items. For each item provide:
+- topic: either "AI" or "Business"
+- title: headline (concise)
+- summary: 2-3 sentence summary of what happened and why it matters
+- insight: 1 sentence personal insight — how this could affect someone in construction/investing/personal growth in Singapore
+- source: likely source name
+
+Respond ONLY in valid JSON array format, no other text:
+[{"topic":"AI","title":"...","summary":"...","insight":"...","source":"..."},...]` }]
+      })
+    });
+
+    const json = await res.json();
+    const text = json.content[0].text.trim();
+    const articles = JSON.parse(text.replace(/```json|```/g, ''));
+
+    const today_iso = new Date().toISOString().slice(0,10);
+    // Remove old today briefing if exists
+    DATA.briefings = DATA.briefings.filter(b => b.date !== today_iso);
+    DATA.briefings.push({ date: today_iso, articles });
+    save();
+
+    renderBriefingArticles(articles);
+    document.getElementById('briefingStatus').innerHTML = '<div class="briefing-status briefing-done">✅ Briefing generated successfully</div>';
+    document.getElementById('briefingTime').textContent = 'Generated just now';
+  } catch(e) {
+    console.error(e);
+    document.getElementById('briefingStatus').innerHTML = `<div class="briefing-status briefing-error">❌ Failed: ${e.message}. Check your API key.</div>`;
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '⚡ Generate Today\'s Briefing';
+}
+
+function renderBriefingArticles(articles) {
+  const el = document.getElementById('briefingContent');
+  if (!articles || articles.length === 0) { el.innerHTML = ''; return; }
+  el.innerHTML = articles.map((a, i) => {
+    const topicClass = a.topic === 'AI' ? 'topic-ai' : 'topic-biz';
+    return `<div class="news-item">
+      <span class="news-topic ${topicClass}">${a.topic === 'AI' ? '🤖 AI / Tech' : '💼 Business'}</span>
+      <div class="news-title">${a.title}</div>
+      <div class="news-summary">${a.summary}</div>
+      <div class="news-insight">💡 <strong>For you:</strong> ${a.insight}</div>
+      <div class="news-meta">
+        <span>📰 ${a.source || 'Various'}</span>
+        <button class="btn btn-sm" onclick="saveArticleAsNote(${i})" style="margin-left:auto;">📝 Save to Notes</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function saveArticleAsNote(idx) {
+  const today = new Date().toISOString().slice(0,10);
+  const briefing = DATA.briefings.find(b => b.date === today);
+  if (!briefing || !briefing.articles[idx]) return;
+  const a = briefing.articles[idx];
+  DATA.notes.push({
+    date: today,
+    text: a.title + ' — ' + a.summary + '\n💡 ' + a.insight,
+    source: a.source,
+    tag: a.topic === 'AI' ? 'AI' : 'Business'
+  });
+  save();
+  renderJournalHistory();
+  toast('📝 Saved to notes', 'ok');
+}
+
+function saveApiKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key) return;
+  DATA.apiKey = key;
+  save();
+  document.getElementById('apiModal').style.display = 'none';
+  generateBriefing();
+}
+
+// ═══════════════════════════════════════
+// NOTEBOOK
+// ═══════════════════════════════════════
+function saveNote() {
+  const text = document.getElementById('noteText').value.trim();
+  if (!text) { toast('Write something first', 'err'); return; }
+  DATA.notes.push({
+    date: new Date().toISOString().slice(0,10),
+    text,
+    source: document.getElementById('noteSource').value,
+    tag: document.getElementById('noteTag').value
+  });
+  document.getElementById('noteText').value = '';
+  document.getElementById('noteSource').value = '';
+  save();
+  renderJournalHistory();
+  toast('📝 Note saved', 'ok');
+}
+
+function renderJournalHistory() {
+  const el = document.getElementById('journalHistory');
+  const sorted = DATA.notes.slice().sort((a,b) => (b.date||'').localeCompare(a.date||''));
+  if (sorted.length === 0) { el.innerHTML = '<div class="card" style="text-align:center;color:var(--ink3);padding:24px;">No notes yet. Start learning!</div>'; return; }
+
+  const tagColors = { AI:'var(--blue)', Business:'var(--green)', Investing:'var(--warm)', Psychology:'var(--purple)', 'Life Lesson':'var(--red)', Quote:'var(--warm)', Other:'var(--ink3)' };
+  const tagBgs = { AI:'var(--blue-bg)', Business:'var(--green-bg)', Investing:'var(--warm-bg)', Psychology:'var(--purple-bg)', 'Life Lesson':'var(--red-bg)', Quote:'var(--warm-bg)', Other:'var(--bg2)' };
+
+  el.innerHTML = sorted.slice(0,20).map((n,i) => `
+    <div class="journal-entry">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span class="journal-date">${formatDate(n.date)}</span>
+        <button class="btn btn-sm" onclick="DATA.notes.splice(DATA.notes.length-1-${i},1);save();renderJournalHistory();" style="padding:2px 8px;font-size:0.65rem;color:var(--ink3);">✕</button>
+      </div>
+      <div class="journal-text">${n.text}</div>
+      <div class="journal-tags">
+        <span style="font-size:0.65rem;padding:2px 8px;border-radius:999px;background:${tagBgs[n.tag]||'var(--bg2)'};color:${tagColors[n.tag]||'var(--ink3)'};font-weight:600;">${n.tag}</span>
+        ${n.source ? `<span style="font-size:0.65rem;color:var(--ink3);">📰 ${n.source}</span>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════
+// BOOKMARKS
+// ═══════════════════════════════════════
+function saveBookmark() {
+  const title = document.getElementById('bmTitle').value.trim();
+  const url = document.getElementById('bmUrl').value.trim();
+  if (!title) return;
+  DATA.bookmarks.push({ title, url, date: new Date().toISOString().slice(0,10) });
+  document.getElementById('bmTitle').value = '';
+  document.getElementById('bmUrl').value = '';
+  save();
+  renderBookmarks();
+  toast('🔖 Bookmarked', 'ok');
+}
+
+function renderBookmarks() {
+  const el = document.getElementById('bookmarkList');
+  if (DATA.bookmarks.length === 0) { el.innerHTML = ''; return; }
+  el.innerHTML = DATA.bookmarks.slice().reverse().map((b,i) =>
+    `<div class="bookmark">
+      <span class="bookmark-title">${b.title}</span>
+      ${b.url ? `<a href="${b.url}" target="_blank" class="bookmark-link">Open ↗</a>` : ''}
+      <span style="font-size:0.68rem;color:var(--ink3);">${formatDate(b.date)}</span>
+      <button class="btn btn-sm" onclick="DATA.bookmarks.splice(DATA.bookmarks.length-1-${i},1);save();renderBookmarks();" style="padding:2px 6px;font-size:0.6rem;color:var(--ink3);">✕</button>
+    </div>`
+  ).join('');
+}
+
+// ═══════════════════════════════════════
+// CUSTOM QUOTES
+// ═══════════════════════════════════════
+function saveCustomQuote() {
+  const text = document.getElementById('customQuote').value.trim();
+  const author = document.getElementById('customAuthor').value.trim() || 'Unknown';
+  if (!text) return;
+  DATA.customQuotes.push({ text, author });
+  document.getElementById('customQuote').value = '';
+  document.getElementById('customAuthor').value = '';
+  save();
+  renderQuoteCollection();
+  toast('💎 Quote saved', 'ok');
+}
+
+function renderQuoteCollection() {
+  const el = document.getElementById('quoteCollection');
+  const all = [...DATA.customQuotes.map(q => ({...q, custom: true})), ...QUOTE_LIBRARY.map(q => ({...q, custom: false}))];
+  el.innerHTML = all.slice(0,30).map((q, i) => `
+    <div class="quote-card" style="text-align:left;padding:16px 20px;margin-bottom:8px;background:var(--surface);border:1px solid var(--border);box-shadow:none;">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:0.95rem;font-style:italic;line-height:1.7;color:var(--ink);">"${q.text}"</div>
+      <div style="font-size:0.72rem;color:var(--warm);margin-top:6px;font-weight:600;">— ${q.author}</div>
+      ${q.custom ? `<button class="btn btn-sm" onclick="DATA.customQuotes.splice(${i},1);save();renderQuoteCollection();" style="margin-top:6px;padding:2px 8px;font-size:0.6rem;color:var(--ink3);">Remove</button>` : ''}
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════
+// TABS & UTILS
+// ═══════════════════════════════════════
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  const btn = document.querySelector(`.tab-btn[onclick="switchTab('${name}')"]`);
+  if (btn) btn.classList.add('active');
+}
+
+function toast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + type;
+  setTimeout(() => el.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>
