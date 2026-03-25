@@ -312,15 +312,19 @@ let DATA = {
   todayQuote: null
 };
 
-(function init() {
+(async function init() {
   document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('en-SG', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
 
-  try { const saved = JSON.parse(localStorage.getItem('daoyou_wisdom')); if (saved) DATA = {...DATA, ...saved}; } catch(e) {}
+  try {
+    const res = await apiFetch('learning_getEntries');
+    if (res && res.entries) DATA.notes = res.entries.map(x => ({ date:x.Date, text:x.Text, source:x.Source, tag:x.Tag }));
+  } catch(e) {
+    try { const saved = JSON.parse(localStorage.getItem('daoyou_wisdom')); if (saved) DATA = {...DATA, ...saved}; } catch(_) {}
+  }
 
   showDailyQuote();
   renderAll();
 
-  // Check if today's briefing exists
   const today = new Date().toISOString().slice(0,10);
   const todayBriefing = DATA.briefings.find(b => b.date === today);
   if (todayBriefing) {
