@@ -298,6 +298,8 @@ const QUOTE_LIBRARY = [
   { text: "The world is not driven by greed. It's driven by envy.", author: "Charlie Munger", mood: ["wisdom", "self-awareness"] },
 ];
 
+const API_URL = 'https://script.google.com/macros/s/AKfycbw5H1tcIL8kWAn1RMwFzyA5ISz51XfhaIhO6cCOW-Zgl4ZxqTjRsjBWbe6YVLcp5FFDag/exec';
+async function apiFetch(action, method='GET', body=null){ const url = method==='GET' ? `${API_URL}?${new URLSearchParams({action,...(body||{})}).toString()}` : API_URL; const res = await fetch(url,{method,headers:method==='GET'?{}:{'Content-Type':'application/json'},body:method==='GET'?undefined:JSON.stringify({action,...(body||{})})}); return res.json(); }
 // ═══════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════
@@ -454,6 +456,7 @@ function saveArticleAsNote(idx) {
   const briefing = DATA.briefings.find(b => b.date === today);
   if (!briefing || !briefing.articles[idx]) return;
   const a = briefing.articles[idx];
+  await apiFetch('learning_addEntry','POST',{date:new Date().toISOString().slice(0,10),text,source: document.getElementById('noteSource').value, tag: document.getElementById('noteTag').value});
   DATA.notes.push({
     date: today,
     text: a.title + ' — ' + a.summary + '\n💡 ' + a.insight,
@@ -477,9 +480,10 @@ function saveApiKey() {
 // ═══════════════════════════════════════
 // NOTEBOOK
 // ═══════════════════════════════════════
-function saveNote() {
+async function saveNote() {
   const text = document.getElementById('noteText').value.trim();
   if (!text) { toast('Write something first', 'err'); return; }
+  await apiFetch('learning_addEntry','POST',{date:new Date().toISOString().slice(0,10),text,source: document.getElementById('noteSource').value, tag: document.getElementById('noteTag').value});
   DATA.notes.push({
     date: new Date().toISOString().slice(0,10),
     text,
